@@ -1,11 +1,13 @@
 #import "FFFastImageView.h"
 
-
 @interface FFFastImageView()
 
 @property (nonatomic, assign) BOOL hasSentOnLoadStart;
 @property (nonatomic, assign) BOOL hasCompleted;
 @property (nonatomic, assign) BOOL hasErrored;
+
+// Whether the latest change of props requires the image to be reloaded
+@property (nonatomic, assign) BOOL needsReload;
 
 @property (nonatomic, strong) NSDictionary* onLoadEvent;
 
@@ -63,6 +65,31 @@
     }
 }
 
+- (void)setImageColor:(UIColor *)imageColor {
+    if (imageColor != nil) {
+        _imageColor = imageColor;
+        super.image = [self makeImage:super.image withTint:self.imageColor];
+    }
+}
+
+- (UIImage*)makeImage:(UIImage *)image withTint:(UIColor *)color {
+    UIImage *newImage = [image imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+    UIGraphicsBeginImageContextWithOptions(image.size, NO, newImage.scale);
+    [color set];
+    [newImage drawInRect:CGRectMake(0, 0, image.size.width, newImage.size.height)];
+    newImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    return newImage;
+}
+
+- (void)setImage:(UIImage *)image {
+    if (self.imageColor != nil) {
+        super.image = [self makeImage:image withTint:self.imageColor];
+    } else {
+        super.image = image;
+    }
+}
+
 - (void)sendOnLoad:(UIImage *)image {
     self.onLoadEvent = @{
                          @"width":[NSNumber numberWithDouble:image.size.width],
@@ -83,9 +110,24 @@
 - (void)setSource:(FFFastImageSource *)source {
     if (_source != source) {
         _source = source;
-        
+        _needsReload = YES;
+    }
+}
+
+- (void)didSetProps:(NSArray<NSString *> *)changedProps
+{
+    if (_needsReload) {
+        [self reloadImage];
+    }
+}
+
+- (void)reloadImage
+{
+    _needsReload = NO;
+    
+    if (_source) {
         // Attach a observer to refresh other FFFastImageView instance sharing the same source
-        [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(imageDidLoadObserver:) name:source.url.absoluteString object:nil];
+        [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(imageDidLoadObserver:) name:_source.url.absoluteString object:nil];
         
         // Load base64 images.
         NSString* url = [_source.url absoluteString];
@@ -137,7 +179,7 @@
                 options |= SDWebImageRefreshCached;
                 break;
             case FFFCacheControlCacheOnly:
-                options |= SDWebImageCacheMemoryOnly;
+                options |= SDWebImageFromCacheOnly;
                 break;
             case FFFCacheControlImmutable:
                 break;
