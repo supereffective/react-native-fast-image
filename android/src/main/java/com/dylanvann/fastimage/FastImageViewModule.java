@@ -53,4 +53,12 @@ class FastImageViewModule extends ReactContextBaseJavaModule {
             }
         });
     }
+
+    public void replaceImageInCache(String originalURL, String newURL) {
+
+        // final Activity activity = getCurrentActivity();
+
+        // Glide.with(activity).load(originalURL).
+
+    }
 }

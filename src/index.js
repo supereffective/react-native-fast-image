@@ -105,6 +105,10 @@ FastImage.preload = sources => {
     FastImageViewNativeModule.preload(sources)
 }
 
+FastImage.replaceImageInCache = (originalURL, newURL) => {
+    FastImageViewNativeModule.replaceImageInCache(originalURL, newURL)
+}
+
 FastImage.defaultProps = {
     resizeMode: FastImage.resizeMode.cover,
 }
