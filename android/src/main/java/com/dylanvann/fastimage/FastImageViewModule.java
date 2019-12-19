@@ -3,13 +3,11 @@ package com.dylanvann.fastimage;
 import android.app.Activity;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.model.GlideUrl;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
-import com.facebook.react.views.imagehelper.ImageSource;
 
 class FastImageViewModule extends ReactContextBaseJavaModule {
 
@@ -54,11 +52,12 @@ class FastImageViewModule extends ReactContextBaseJavaModule {
         });
     }
 
+    @ReactMethod
     public void replaceImageInCache(String originalURL, String newURL) {
 
-        // final Activity activity = getCurrentActivity();
+        //final Activity activity = getCurrentActivity();
 
-        // Glide.with(activity).load(originalURL).
+        //Glide.with(activity).load
 
     }
 }
