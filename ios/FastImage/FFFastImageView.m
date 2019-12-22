@@ -1,5 +1,7 @@
 #import "FFFastImageView.h"
 
+#import <SDWebImageError.h>
+
 @interface FFFastImageView()
 
 @property (nonatomic, assign) BOOL hasSentOnLoadStart;
@@ -124,11 +126,11 @@
 - (void)reloadImage
 {
     _needsReload = NO;
-    
+
     if (_source) {
         // Attach a observer to refresh other FFFastImageView instance sharing the same source
         [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(imageDidLoadObserver:) name:_source.url.absoluteString object:nil];
-        
+
         // Load base64 images.
         NSString* url = [_source.url absoluteString];
         if (url && [url hasPrefix:@"data:image"]) {
@@ -148,20 +150,20 @@
             }
             self.hasCompleted = YES;
             [self sendOnLoad:image];
-            
+
             if (self.onFastImageLoadEnd) {
                 self.onFastImageLoadEnd(@{});
             }
             return;
         }
-        
+
         // Set headers.
         [_source.headers enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString* header, BOOL *stop) {
             [[SDWebImageDownloader sharedDownloader] setValue:header forHTTPHeaderField:key];
         }];
-        
+
         // Set priority.
-        SDWebImageOptions options = SDWebImageRetryFailed | SDWebImageHandleCookies;
+        SDWebImageOptions options = SDWebImageRetryFailed;
         switch (_source.priority) {
             case FFFPriorityLow:
                 options |= SDWebImageLowPriority;
@@ -173,7 +175,7 @@
                 options |= SDWebImageHighPriority;
                 break;
         }
-        
+
         switch (_source.cacheControl) {
             case FFFCacheControlWeb:
                 options |= SDWebImageRefreshCached;
@@ -184,7 +186,7 @@
             case FFFCacheControlImmutable:
                 break;
         }
-        
+
         if (self.onFastImageLoadStart) {
             self.onFastImageLoadStart(@{});
             self.hasSentOnLoadStart = YES;
@@ -193,7 +195,7 @@
         }
         self.hasCompleted = NO;
         self.hasErrored = NO;
-        
+
         [self downloadImage:_source options:options retry:0];
     }
 }
@@ -215,7 +217,7 @@
                                   SDImageCacheType cacheType,
                                   NSURL * _Nullable imageURL) {
                         if (error) {
-                            if (retry >= 3) {
+                            if (retry >= 3 || error.code == SDWebImageErrorCancelled) {
                                 weakSelf.hasErrored = YES;
                                 if (weakSelf.onFastImageError) {
                                     weakSelf.onFastImageError(@{});

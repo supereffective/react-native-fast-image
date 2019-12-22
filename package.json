@@ -1,6 +1,6 @@
 {
     "name": "@supereffective/react-native-fast-image",
-    "version": "7.0.5",
+    "version": "7.0.6",
     "description": "🚩 FastImage, performant React Native image component.",
     "keywords": [
         "cache",
