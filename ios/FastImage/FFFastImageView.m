@@ -161,7 +161,7 @@
         }];
         
         // Set priority.
-        SDWebImageOptions options = SDWebImageRetryFailed;
+        SDWebImageOptions options = SDWebImageRetryFailed | SDWebImageHandleCookies;
         switch (_source.priority) {
             case FFFPriorityLow:
                 options |= SDWebImageLowPriority;
