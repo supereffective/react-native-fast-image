@@ -12,6 +12,12 @@ RCT_EXPORT_MODULE(FastImageView)
   return [[FFFastImageView alloc] init];
 }
 
++ (void) initialize
+{
+    SDImageCache.sharedImageCache.config.maxDiskAge = -1;
+    SDImageCache.sharedImageCache.config.maxDiskSize = 250 * 1000000; // 250MB as Android Glide
+}
+
 RCT_EXPORT_VIEW_PROPERTY(source, FFFastImageSource)
 RCT_EXPORT_VIEW_PROPERTY(resizeMode, RCTResizeMode)
 RCT_EXPORT_VIEW_PROPERTY(onFastImageLoadStart, RCTDirectEventBlock)
