@@ -3,6 +3,8 @@
 
 #import <SDWebImage/SDWebImagePrefetcher.h>
 #import <SDImageCache.h>
+#import <SDWebImage/SDAnimatedImageView+WebCache.h>
+#import <SDWebImage/SDWebImageDownloader.h>
 
 @implementation FFFastImageViewManager
 
@@ -45,12 +47,34 @@ RCT_EXPORT_METHOD(preload:(nonnull NSArray<FFFastImageSource *> *)sources)
 
 RCT_EXPORT_METHOD(replaceImageInCache:(nonnull NSString *)originalURL : (nonnull NSString *)newURL)
 {
-    NSData * imageData = [[NSData alloc] initWithContentsOfURL: [NSURL URLWithString: originalURL]];
-    UIImage * image = [UIImage imageWithData: imageData];
 
-    if (image) {
-        [SDImageCache.sharedImageCache storeImage:image forKey:newURL completion:^{}];
+    if ([originalURL.pathExtension.lowercaseString isEqualToString:@"gif"]) {
+
+        dispatch_async(dispatch_get_main_queue(), ^{
+
+                SDAnimatedImageView * imageView = [SDAnimatedImageView new];
+                [imageView sd_setImageWithURL:[NSURL fileURLWithPath:originalURL] completed:^(UIImage * _Nullable image, NSError * _Nullable error, SDImageCacheType cacheType, NSURL * _Nullable imageURL) {
+
+                    if (image) {
+                        [SDImageCache.sharedImageCache storeImage:image forKey:newURL completion:^{}];
+                    }
+
+                }];
+
+            });
+
     }
+    else {
+
+        NSData * imageData = [[NSData alloc] initWithContentsOfURL: [NSURL URLWithString: originalURL]];
+        UIImage * image = [UIImage imageWithData: imageData];
+
+        if (image) {
+            [SDImageCache.sharedImageCache storeImage:image forKey:newURL completion:^{}];
+        }
+
+    }
+
 }
 
 @end
